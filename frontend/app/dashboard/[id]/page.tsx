@@ -15,9 +15,18 @@ export default function Dashboard({ params }: any) {
     const id = params.id
 
     const [sensorData, setSensorData] = useState(null);
+    const [prediction, setPrediction] = useState(null);
 
     const getSensorData = async () => {
         const data = await axios.post("http://localhost:8000/fetch", {
+            file_url: `https://akerlxpmblqfaifmgbny.supabase.co/storage/v1/object/public/input-data/${id}.txt`
+        })
+
+        return data.data
+    }
+
+    const predictMaintenance = async () => {
+        const data = await axios.post("http://localhost:8000/predict", {
             file_url: `https://akerlxpmblqfaifmgbny.supabase.co/storage/v1/object/public/input-data/${id}.txt`
         })
 
@@ -28,39 +37,11 @@ export default function Dashboard({ params }: any) {
         if (id) {
             getSensorData()
                 .then(d => setSensorData(d))
+
+            predictMaintenance()
+                .then(d => setPrediction(d.prediction))
         }
     }, [id])
-
-    // Updated sensor data structure to match screenshot
-    const _sensorData = [
-        {
-            timestamp: '2024-03-07 14:30:00',
-            readings: [
-                { type: 'ENGINE TEMP (°C)', value: '348.5', trend: null },
-                { type: 'VIBRATION (G)', value: '0.42', trend: null },
-                { type: 'PRESSURE (PSI)', value: '32.1', trend: null }
-            ],
-            status: 'NORMAL'
-        },
-        {
-            timestamp: '2024-03-07 14:25:00',
-            readings: [
-                { type: 'ENGINE TEMP (°C)', value: '352.3', trend: 'up' },
-                { type: 'VIBRATION (G)', value: '0.45', trend: 'up' },
-                { type: 'PRESSURE (PSI)', value: '31.9', trend: 'down' }
-            ],
-            status: 'WARNING'
-        },
-        {
-            timestamp: '2024-03-07 14:20:00',
-            readings: [
-                { type: 'ENGINE TEMP (°C)', value: '347.8', trend: 'down' },
-                { type: 'VIBRATION (G)', value: '0.41', trend: null },
-                { type: 'PRESSURE (PSI)', value: '32.0', trend: 'up' }
-            ],
-            status: 'NORMAL'
-        }
-    ];
 
     const getStatusStyle = (status: any) => {
         if (status === 'NORMAL') {
@@ -81,7 +62,7 @@ export default function Dashboard({ params }: any) {
     return (
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
-                <Link href="/" className="text-black text-3xl font-bold cursor-pointer">Cathay Pacific Fleet Overview</Link>
+                <Link href="/" className="text-black text-3xl font-bold cursor-pointer">OptiTech - Fleet Overview</Link>
                 <div className="flex items-center gap-2">
                     <Button variant="default">
                         <BarChart className="mr-2 h-4 w-4" /> Analytics
@@ -137,39 +118,9 @@ export default function Dashboard({ params }: any) {
 
             {/* Readings Table */}
             <Card>
-                <CardHeader>
-                    <CardTitle>Sensor Readings History</CardTitle>
-                </CardHeader>
                 <CardContent>
                     <div className="relative overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                            <thead className="text-xs uppercase">
-                                <tr>
-                                    <th className="px-6 py-3 font-medium">CYCLE</th>
-                                    <th className="px-6 py-3 font-medium">ENGINE TEMP (°C)</th>
-                                    <th className="px-6 py-3 font-medium">VIBRATION (G)</th>
-                                    <th className="px-6 py-3 font-medium">PRESSURE (PSI)</th>
-                                    <th className="px-6 py-3 font-medium">STATUS</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                {_sensorData.map((row) => (
-                                    <tr key={row.timestamp} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td className="px-6 py-4">{row.timestamp}</td>
-                                        {row.readings.map((reading, idx) => (
-                                            <td key={idx} className="px-6 py-4">
-                                                {reading.value} <TrendIndicator trend={reading.trend} />
-                                            </td>
-                                        ))}
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs ${getStatusStyle(row.status)}`}>
-                                                {row.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                        <h1 className='text-2xl font-bold flex justify-center py-4'>Maintenance must be done in {prediction ? parseInt(prediction) : "Loading..."} cycles</h1>
                     </div>
                 </CardContent>
             </Card>

@@ -19,7 +19,7 @@ const FleetDashboard = async () => {
     return (
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center">
-                <Link href="/" className="text-black text-3xl font-bold cursor-pointer">Cathay Pacific Fleet Overview</Link>
+                <Link href="/" className="text-black text-3xl font-bold cursor-pointer">OptiTech - Fleet Overview</Link>
                 <div className="flex items-center gap-2">
                     <Button variant="default">
                         <BarChart className="mr-2 h-4 w-4" /> Analytics
